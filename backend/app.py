@@ -19,18 +19,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+load_dotenv('.env.local')
 
 jobs = {}
 
 # AWS S3 config
-#S3_BUCKET = "your-bucket-name"
-#s3 = boto3.client("s3")  # Make sure your AWS creds are set via env or ~/.aws
+s3 = boto3.client(
+    "s3",
+    region_name=os.getenv("AWS_REGION"),
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    endpoint_url="https://s3.eu-west-2.amazonaws.com",
+)
 
-load_dotenv('.env.local')
 
 UNOSERVER_URL = os.getenv("UNOSERVER_URL")
 
-def convert_and_upload(job_id: str, pptx_path: str):
+def convert_and_upload(job_id: str, pptx_path: str, original_filename: str):
     pdf_path = pptx_path.replace(".pptx", ".pdf")
     jobs[job_id] = {"status": "converting", "error": None, "download_url": None}
     try:
@@ -47,18 +52,29 @@ def convert_and_upload(job_id: str, pptx_path: str):
             out.write(response.content)
 
         # Upload to S3
-       # s3_key = f"converted/{job_id}.pdf"
-        #s3.upload_file(pdf_path, S3_BUCKET, s3_key)
+        s3_key = f"converted/{job_id}.pdf"
 
-        # Presigned URL
-       # url = s3.generate_presigned_url(
-       #     "get_object",
-       #     Params={"Bucket": S3_BUCKET, "Key": s3_key},
-       #     ExpiresIn=3600
-      #  )
-        time.sleep(10)
+        # Upload to S3
+        s3.upload_file(pdf_path, os.getenv("S3_BUCKET"), s3_key)
+
+        # Generate presigned download URL for that key
+        url = s3.generate_presigned_url(
+        "get_object",
+        Params={
+            "Bucket": os.getenv("S3_BUCKET"),
+            "Key": s3_key,
+            "ResponseContentDisposition": f'attachment; filename="{original_filename.replace(".pptx", ".pdf")}"'
+        },
+        ExpiresIn=600
+    )
+        
+        print("Uploading key:", s3_key)
+        print("Presigned URL:", url)
+
+
+        #time.sleep(10)
         jobs[job_id]["status"] = "done"
-        jobs[job_id]["download_url"] = "www.google.com"
+        jobs[job_id]["download_url"] = url
 
         os.remove(pptx_path)
         os.remove(pdf_path)
@@ -78,7 +94,12 @@ async def upload_file(file: UploadFile = File(...), background_tasks: Background
     with open(pptx_path, "wb") as f:
         f.write(await file.read())
 
-    background_tasks.add_task(convert_and_upload, job_id, pptx_path)
+    background_tasks.add_task(
+    convert_and_upload,
+    job_id,
+    pptx_path,
+    file.filename 
+    )
 
     return {"job_id": job_id}
 
