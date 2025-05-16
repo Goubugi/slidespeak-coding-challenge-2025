@@ -1,17 +1,65 @@
-import React from "react";
+"use client";
 
-export default function FileDropzone({ onFileSelected }: { onFileSelected: (file: File) => void }) {
-    return (
-      <div>
-        <input
-          type="file"
-          accept=".ppt,.pptx"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) onFileSelected(file);
-          }}
-        />
+import React, { useRef, useState } from "react";
+import UploadIcon from "@/icons/UploadIcon";
+
+export default function FileDropzone({
+  onFileSelected,
+}: {
+  onFileSelected: (file: File) => void;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.name.endsWith(".pptx")) {
+      onFileSelected(file);
+    }
+  };
+
+  return (
+    <div
+      className={`border-2 ${
+        isDragging ? "border-blue-400 bg-blue-50" : "border-dashed border-gray-300"
+      } rounded-xl bg-white shadow-md p-10 w-full max-w-xl text-center min-h-[320px] flex flex-col items-center justify-center space-y-4 transition-colors`}
+      onDragOver={(e) => e.preventDefault()}
+      onDragEnter={() => setIsDragging(true)}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={handleDrop}
+    >
+      {/* Upload icon */}
+      <div className="bg-gray-100 rounded-full p-6">
+        <UploadIcon />
       </div>
-    );
-  }
-  
+
+      {/* Instruction */}
+      <p className="text-gray-600 text-sm">
+        Drag and drop a PowerPoint file to convert to PDF.
+      </p>
+
+      {/* Upload button */}
+      <button
+        className="bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-lg hover:bg-blue-200"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        Choose file
+      </button>
+
+      {/* Hidden file input */}
+      <input
+        type="file"
+        accept=".ppt,.pptx"
+        ref={fileInputRef}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onFileSelected(file);
+        }}
+        className="hidden"
+      />
+    </div>
+  );
+}
