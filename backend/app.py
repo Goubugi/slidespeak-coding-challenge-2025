@@ -5,7 +5,6 @@ import uuid
 import os
 import requests
 import boto3
-import time
 from dotenv import load_dotenv
 import os
 
@@ -15,8 +14,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # your frontend
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["POST", "GET"],
+    allow_headers=["Content-Type"],
 )
 
 load_dotenv('.env.local')
@@ -29,7 +28,7 @@ s3 = boto3.client(
     region_name=os.getenv("AWS_REGION"),
     aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
     aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-    endpoint_url="https://s3.eu-west-2.amazonaws.com",
+    endpoint_url=os.getenv("endpoint_url"),
 )
 
 
@@ -39,6 +38,8 @@ def convert_and_upload(job_id: str, pptx_path: str, original_filename: str):
     pdf_path = pptx_path.replace(".pptx", ".pdf")
     jobs[job_id] = {"status": "converting", "error": None, "download_url": None}
     try:
+        
+        #Call the unoserver, try to convert pptx to pdf
         with open(pptx_path, 'rb') as f:
             response = requests.post(
                 UNOSERVER_URL,
@@ -53,11 +54,9 @@ def convert_and_upload(job_id: str, pptx_path: str, original_filename: str):
 
         # Upload to S3
         s3_key = f"converted/{job_id}.pdf"
-
-        # Upload to S3
         s3.upload_file(pdf_path, os.getenv("S3_BUCKET"), s3_key)
 
-        # Generate presigned download URL for that key
+        # Generate presigned download URL for that key, expires in 10 minutes.
         url = s3.generate_presigned_url(
         "get_object",
         Params={
@@ -67,15 +66,10 @@ def convert_and_upload(job_id: str, pptx_path: str, original_filename: str):
         },
         ExpiresIn=600
     )
-        
-        print("Uploading key:", s3_key)
-        print("Presigned URL:", url)
 
-
-        #time.sleep(10)
+        #Book keeping.
         jobs[job_id]["status"] = "done"
         jobs[job_id]["download_url"] = url
-
         os.remove(pptx_path)
         os.remove(pdf_path)
 
