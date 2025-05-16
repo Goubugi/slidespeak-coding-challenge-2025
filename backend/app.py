@@ -91,8 +91,11 @@ def convert_and_upload(job_id: str, pptx_path: str, original_filename: str):
         jobs[job_id]["error"] = str(e)
 
 
-
-@app.post("/upload", summary="Upload a PPTX file", description="Accepts a PowerPoint .pptx file and begins the conversion to PDF by adding it to a background task.")
+@app.post(
+    "/upload",
+    summary="Upload a PPTX file",
+    description="Accepts a PowerPoint .pptx file and begins the conversion to PDF by adding it to a background task.",
+)
 async def upload_file(
     file: UploadFile = File(...), background_tasks: BackgroundTasks = None
 ):
@@ -131,7 +134,11 @@ async def upload_file(
     return {"job_id": job_id}
 
 
-@app.get("/status/{job_id}", summary = "Checks if current job is completed", description="Accepts a job_id, and returns status of that job. If not found, returns error:404.")
+@app.get(
+    "/status/{job_id}",
+    summary="Checks if current job is completed",
+    description="Accepts a job_id, and returns status of that job. If not found, returns error:404.",
+)
 def get_status(job_id: str):
     """
     Retrieves the processing status of a specific job by its ID.
