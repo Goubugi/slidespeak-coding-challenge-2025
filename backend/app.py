@@ -6,19 +6,17 @@ import os
 import requests
 import boto3
 from dotenv import load_dotenv
-import os
 
 app = FastAPI()
 
-# Allow CORS (you can lock this down later)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # your frontend
+    allow_origins=["http://localhost:3000"],
     allow_methods=["POST", "GET"],
     allow_headers=["Content-Type"],
 )
 
-load_dotenv('.env.local')
+load_dotenv(".env.local")
 
 jobs = {}
 
@@ -34,13 +32,14 @@ s3 = boto3.client(
 
 UNOSERVER_URL = os.getenv("UNOSERVER_URL")
 
+
 def convert_and_upload(job_id: str, pptx_path: str, original_filename: str):
     pdf_path = pptx_path.replace(".pptx", ".pdf")
     jobs[job_id] = {"status": "converting", "error": None, "download_url": None}
     try:
-        
-        #Call the unoserver, try to convert pptx to pdf
-        with open(pptx_path, 'rb') as f:
+
+        # Call the unoserver, try to convert pptx to pdf
+        with open(pptx_path, "rb") as f:
             response = requests.post(
                 UNOSERVER_URL,
                 files={"file": f},
@@ -58,16 +57,16 @@ def convert_and_upload(job_id: str, pptx_path: str, original_filename: str):
 
         # Generate presigned download URL for that key, expires in 10 minutes.
         url = s3.generate_presigned_url(
-        "get_object",
-        Params={
-            "Bucket": os.getenv("S3_BUCKET"),
-            "Key": s3_key,
-            "ResponseContentDisposition": f'attachment; filename="{original_filename.replace(".pptx", ".pdf")}"'
-        },
-        ExpiresIn=600
-    )
+            "get_object",
+            Params={
+                "Bucket": os.getenv("S3_BUCKET"),
+                "Key": s3_key,
+                "ResponseContentDisposition": f'attachment; filename="{original_filename.replace(".pptx", ".pdf")}"',
+            },
+            ExpiresIn=600,
+        )
 
-        #Book keeping.
+        # Book keeping.
         jobs[job_id]["status"] = "done"
         jobs[job_id]["download_url"] = url
         os.remove(pptx_path)
@@ -77,10 +76,15 @@ def convert_and_upload(job_id: str, pptx_path: str, original_filename: str):
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = str(e)
 
+
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...), background_tasks: BackgroundTasks = None):
+async def upload_file(
+    file: UploadFile = File(...), background_tasks: BackgroundTasks = None
+):
     if not file.filename.endswith(".pptx"):
-        return JSONResponse(status_code=400, content={"error": "Only .pptx files are supported"})
+        return JSONResponse(
+            status_code=400, content={"error": "Only .pptx files are supported"}
+        )
 
     job_id = str(uuid.uuid4())
     pptx_path = f"/tmp/{job_id}.pptx"
@@ -88,14 +92,10 @@ async def upload_file(file: UploadFile = File(...), background_tasks: Background
     with open(pptx_path, "wb") as f:
         f.write(await file.read())
 
-    background_tasks.add_task(
-    convert_and_upload,
-    job_id,
-    pptx_path,
-    file.filename 
-    )
+    background_tasks.add_task(convert_and_upload, job_id, pptx_path, file.filename)
 
     return {"job_id": job_id}
+
 
 @app.get("/status/{job_id}")
 def get_status(job_id: str):
