@@ -28,9 +28,18 @@ export default function FileInfoCard({
       });
 
       const { job_id } = res.data;
+      let attempts = 0;
+      const maxAttempts = 30;
 
       const interval = setInterval(async () => {
         try {
+          attempts++;
+          if (attempts > maxAttempts) {
+            clearInterval(interval);
+            setErrorMessage("Conversion timed out. Please try again.");
+            setStatus("idle");
+            return;
+          }
           const statusRes = await axios.get(`${BACKEND_URL}/status/${job_id}`);
           const jobStatus = statusRes.data;
 
