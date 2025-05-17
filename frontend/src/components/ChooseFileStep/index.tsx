@@ -1,13 +1,11 @@
-import { FC, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import UploadIcon from '@/icons/UploadIcon';
+import { FC, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import UploadIcon from "@/icons/UploadIcon";
 
-type ChooseFileStepProps = {
-};
+type ChooseFileStepProps = {};
 
 export const ChooseFileStep: FC<ChooseFileStepProps> = () => {
-  const { getRootProps, getInputProps } = useDropzone({
-  });
+  const { getRootProps, getInputProps } = useDropzone({});
 
   return (
     <div

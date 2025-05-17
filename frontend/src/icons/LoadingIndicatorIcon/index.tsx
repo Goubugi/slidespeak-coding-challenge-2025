@@ -1,4 +1,6 @@
-export default function LoadingIndicatorIcon({ className = "w-6 h-6 text-blue-600" }) {
+export default function LoadingIndicatorIcon({
+  className = "w-6 h-6 text-blue-600",
+}) {
   return (
     <svg
       className={`animate-spin ${className}`}

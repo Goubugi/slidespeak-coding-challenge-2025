@@ -1,4 +1,5 @@
-import  LoadingIndicatorIcon  from "@/icons/LoadingIndicatorIcon";
+import { ButtonLoading } from "@/icons/ButtonLoading";
+import LoadingIndicatorIcon from "@/icons/LoadingIndicatorIcon";
 
 type Props = {
   file: File;
@@ -8,34 +9,34 @@ export default function UploadScreen({ file }: Props) {
   return (
     <div className="space-y-4">
       {/* File info */}
-      <div className="border p-4 rounded text-left">
-        <p className="font-semibold">{file.name}</p>
-        <p className="text-sm text-gray-500">
+      <div className="border rounded-2xl px-6 py-4 shadow-sm">
+        <p className="font-semibold text-lg text-center">{file.name}</p>
+        <p className="text-sm text-gray-500 text-center">
           {(file.size / 1024 / 1024).toFixed(2)} MB
         </p>
       </div>
 
-      {/* Conversion notice with spinner */}
-      <div className="border rounded p-4 flex items-center gap-2 text-left">
-      <LoadingIndicatorIcon className="w-10 h-10 text-blue-600" />
-
-
-        <p className="text-sm text-gray-700">Converting your file…</p>
+      <div className="border rounded-xl p-4 min-h-[80px] flex items-center">
+        <div className="flex items-center gap-3">
+          <LoadingIndicatorIcon className="w-6 h-6 animate-spin" />
+          <div>
+            <p className="font-semibold">Converting your file…</p>
+          </div>
+        </div>
       </div>
 
-      {/* Disabled buttons */}
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-4">
         <button
           disabled
-          className="border border-gray-300 rounded px-4 py-2 text-gray-400 cursor-not-allowed bg-gray-100"
+          className="w-1/2 border border-gray-300 rounded-xl py-2 text-gray-400 cursor-not-allowed bg-gray-100"
         >
           Cancel
         </button>
         <button
           disabled
-          className="bg-blue-300 text-white px-4 py-2 rounded cursor-not-allowed"
+          className="w-1/2 bg-blue-300 text-white rounded-xl py-2 cursor-not-allowed flex items-center justify-center"
         >
-          Convert
+          <ButtonLoading className="w-6 h-6 text-white-600" />
         </button>
       </div>
     </div>
