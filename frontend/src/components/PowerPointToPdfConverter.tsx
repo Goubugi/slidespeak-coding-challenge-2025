@@ -17,8 +17,6 @@ export function PowerPointToPdfConverter() {
 
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-gray-50 px-4">
-      
-
       {errorMessage && (
         <ErrorToast
           message={errorMessage}
@@ -28,9 +26,14 @@ export function PowerPointToPdfConverter() {
 
       {status === "idle" ? (
         <FileDropzone
-          onFileSelected={(selectedFile) => {
-            setFile(selectedFile);
+          onFileSelected={(file) => {
+            setFile(file);
             setStatus("selected");
+          }}
+          onError={(message) => {
+            setErrorMessage(message);
+            setFile(null);
+            setStatus("idle");
           }}
         />
       ) : (

@@ -5,20 +5,27 @@ import UploadIcon from "@/icons/UploadIcon";
 
 export default function FileDropzone({
   onFileSelected,
+  onError,
 }: {
   onFileSelected: (file: File) => void;
+  onError: (message: string) => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
+  const MAX_SIZE_MB = 20;
 
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.name.endsWith(".pptx")) {
-      onFileSelected(file);
+  const handleFile = (file: File) => {
+    if (!file.name.endsWith(".pptx")) {
+      onError("Only .pptx files are supported.");
+      return;
     }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      onError("File size exceeds 20MB limit.");
+      return;
+    }
+
+    onFileSelected(file);
   };
 
   return (
@@ -31,7 +38,12 @@ export default function FileDropzone({
       onDragOver={(e) => e.preventDefault()}
       onDragEnter={() => setIsDragging(true)}
       onDragLeave={() => setIsDragging(false)}
-      onDrop={handleDrop}
+      onDrop={(e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files?.[0];
+        if (file) handleFile(file);
+      }}
     >
       <div className="bg-gray-100 rounded-full p-6">
         <UploadIcon />
@@ -54,7 +66,7 @@ export default function FileDropzone({
         ref={fileInputRef}
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file) onFileSelected(file);
+          if (file) handleFile(file);
         }}
         className="hidden"
       />
