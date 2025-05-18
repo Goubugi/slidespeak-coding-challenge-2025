@@ -10,7 +10,7 @@ export default function DownloadSuccess({ downloadUrl, onReset }: Props) {
   return (
     <div className="space-y-6">
       <div className="border rounded-xl p-6 flex flex-col items-center justify-center space-y-4">
-        {/* PDF icon with check overlay */}
+        {/* PDF Icon with check overlay, putting the check icon relative to the pdf icon. */}
         <div className="relative w-20 h-20">
           <PdfIcon />
           <div className="absolute bottom-2 left-1/2 transform -translate-x-[60%] translate-y-1/2">
@@ -21,7 +21,7 @@ export default function DownloadSuccess({ downloadUrl, onReset }: Props) {
         <p className="text-xl font-semibold">File converted successfully!</p>
       </div>
 
-      {/*Buttons */}
+      {/*Buttons, one with the download link and the other to reset status and file.*/}
       <div className="flex justify-between gap-4">
         <button
           className="w-1/2 border border-gray-300 rounded-xl py-2 text-gray-700 hover:bg-gray-100"

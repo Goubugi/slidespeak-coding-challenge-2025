@@ -8,6 +8,7 @@ type Props = {
   onCancel: () => void;
 };
 
+//Long file, all API calls are here.
 export default function FileInfoCard({
   file,
   setStatus,
@@ -23,6 +24,7 @@ export default function FileInfoCard({
       const formData = new FormData();
       formData.append("file", file);
 
+      //First, establish connection to the backend and upload the .pptx file, accepts a job id back.
       const res = await axios.post(`${BACKEND_URL}/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -31,6 +33,7 @@ export default function FileInfoCard({
       let attempts = 0;
       const maxAttempts = 30;
 
+      //Ping the backend every 2 seconds, and give up after 30 tries (1 minute)
       const interval = setInterval(async () => {
         try {
           attempts++;
@@ -43,16 +46,14 @@ export default function FileInfoCard({
           const statusRes = await axios.get(`${BACKEND_URL}/status/${job_id}`);
           const jobStatus = statusRes.data;
 
+          //The job status is done, we can proceed to the final screen
           if (jobStatus.status === "done") {
             clearInterval(interval);
             setDownloadUrl(jobStatus.download_url);
             setStatus("done");
           } else if (jobStatus.status === "error") {
-            clearInterval(interval);
-            setErrorMessage(
-              "Something went wrong while converting. Please try again.",
-            );
-            setStatus("idle");
+            //Something failed (maybe unoserver), we throw an error
+            throw new Error("Conversion failed");
           }
         } catch (pollErr) {
           clearInterval(interval);
@@ -63,6 +64,7 @@ export default function FileInfoCard({
         }
       }, 2000);
     } catch (err) {
+      //This error is thrown when connection fails to establish to backend in the first place.
       setStatus("idle");
       setErrorMessage(
         "Something went wrong while converting. Please try again.",
@@ -92,6 +94,7 @@ export default function FileInfoCard({
         </p>
       </div>
 
+      {/* Buttons, for cancel to clear file and return to idle, and convert to run the scripts. */}
       <div className="flex justify-between gap-4">
         <button
           className="flex-1 border border-gray-300 rounded-xl py-2 text-gray-700 hover:bg-gray-100"

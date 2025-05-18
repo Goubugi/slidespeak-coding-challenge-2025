@@ -1,5 +1,8 @@
 # SlideSpeak coding challenge -- Front end app
 
+npx prettier . --write
+npm run lint
+
 ![slidespeak-banner-github](https://github.com/SlideSpeak/slidespeak-webapp/assets/5519740/8ea56893-3c7a-42ee-906c-01e5797287af)
 
 SlideSpeak was built with:

@@ -15,6 +15,7 @@ export default function FileDropzone({
 
   const MAX_SIZE_MB = 20;
 
+  //Error checking for right format and size limits.
   const handleFile = (file: File) => {
     if (!file.name.endsWith(".pptx")) {
       onError("Only .pptx files are supported.");
@@ -29,6 +30,7 @@ export default function FileDropzone({
   };
 
   return (
+    // Handles the drag and drop part of the functional requirements. Checkered if not holding file, and onDrop calls the handleFile function.
     <div
       className={`border-2 ${
         isDragging
@@ -53,14 +55,16 @@ export default function FileDropzone({
         Drag and drop a PowerPoint file to convert to PDF.
       </p>
 
-      <button
-        className="bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-lg hover:bg-blue-200"
-        onClick={() => fileInputRef.current?.click()}
+      {/*Label to let user choose file for upload, the input form is hidden. */}
+      <label
+        htmlFor="file-upload"
+        className="bg-blue-100 text-blue-700 font-medium px-4 py-2 rounded-lg hover:bg-blue-200 cursor-pointer"
       >
         Choose file
-      </button>
+      </label>
 
       <input
+        id="file-upload"
         type="file"
         accept=".ppt,.pptx"
         ref={fileInputRef}

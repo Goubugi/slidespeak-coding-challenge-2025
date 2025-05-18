@@ -8,7 +8,7 @@ type Props = {
 export default function UploadScreen({ file }: Props) {
   return (
     <div className="space-y-4">
-      {/* File info */}
+      {/* File info with size */}
       <div className="border rounded-2xl px-6 py-4 shadow-sm">
         <p className="font-semibold text-lg text-center">{file.name}</p>
         <p className="text-sm text-gray-500 text-center">
@@ -16,6 +16,7 @@ export default function UploadScreen({ file }: Props) {
         </p>
       </div>
 
+      {/* Animated loading indicator icon to spin around */}
       <div className="border rounded-xl p-4 min-h-[80px] flex items-center">
         <div className="flex items-center gap-3">
           <LoadingIndicatorIcon className="w-6 h-6 animate-spin" />
@@ -25,6 +26,7 @@ export default function UploadScreen({ file }: Props) {
         </div>
       </div>
 
+      {/* Buttons, both disabled. One is the cancel button, and the other is the animated spinning */}
       <div className="flex justify-between gap-4">
         <button
           disabled
