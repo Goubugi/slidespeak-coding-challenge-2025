@@ -89,6 +89,7 @@ def convert_and_upload(job_id: str, pptx_path: str, original_filename: str):
     except Exception as e:
         jobs[job_id]["status"] = "error"
         jobs[job_id]["error"] = str(e)
+        os.remove(pdf_path)
 
 
 @app.post(
