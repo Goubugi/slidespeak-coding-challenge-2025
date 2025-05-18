@@ -25,10 +25,10 @@ Once the FastAPI server is running locally, visit:
 ---
 ## Running the backend
 
-``bash
+```bash
 conda activate slidespeak
 uvicorn app:app --reload 
-
+```
 
 
 ## Running with Docker
