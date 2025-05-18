@@ -23,6 +23,13 @@ Once the FastAPI server is running locally, visit:
 - Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
+## Running the backend
+
+``bash
+conda activate slidespeak
+uvicorn app:app --reload 
+
+
 
 ## Running with Docker
 
